@@ -6,15 +6,16 @@ const DEFAULT_OUTPUT_DIR = "/output";
 const MIN_CHARS = 1;
 const MAX_CHARS = 200;
 
-// Real incident, 21 Nov 2026: our second agent reported detailed descriptions of
-// four "Level 2" screenshots. All four were Level 1 — its vision tool could not
-// read local files at all, so it described what it intended, not what it saw.
+// Real incident, 25 Nov 2026: while submitting a sibling revision, our
+// builder hunted the remote HEAD SHA through the GitHub API for 120 rounds
+// (09:53-11:27 UTC). GitHub answered "not found" all 120 times — and the
+// builder kept asking.
 const ENTRY =
-  "My agent described four Level 2 screenshots in detail. All four were Level 1 — it never saw a single one.";
+  "My agent knocked on GitHub's door 120 times, got 'not found' 120 times, and kept knocking.";
 
 // Throws unless text is 1-200 characters (code points), not only whitespace,
 // and has no trailing newline.
-function guard(text: string): string {
+function validateEntry(text: string): string {
   const length = [...text].length;
   if (length < MIN_CHARS || length > MAX_CHARS) {
     throw new Error(
@@ -30,6 +31,10 @@ function guard(text: string): string {
   return text;
 }
 
-const dir = process.env.MAKEFUN_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIR;
-mkdirSync(dir, { recursive: true });
-writeFileSync(join(dir, OUTPUT_FILE_NAME), guard(ENTRY), "utf8");
+function main(): void {
+  const dir = process.env.MAKEFUN_OUTPUT_DIR ?? DEFAULT_OUTPUT_DIR;
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, OUTPUT_FILE_NAME), validateEntry(ENTRY), "utf8");
+}
+
+main();
